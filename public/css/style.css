@@ -125,12 +125,23 @@ body {
 
 #user-list-box ul {
     list-style: none;
+    padding: 5px 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 #user-list-box li {
-    padding: 4px 0;
+    padding: 6px 0;
     font-size: 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    display: block !important;
+}
+
+#user-list-box li:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
 #user-list-box li:last-child {
@@ -144,4 +155,11 @@ body {
         top: 10px;
         right: 10px;
     }
+}
+
+#user-list-box,
+#user-list-box li,
+#user-list-box ul,
+#user-list-box h3 {
+    color: white !important;
 }

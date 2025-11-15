@@ -2,6 +2,9 @@ const socket = io();
 
 // prompt for username (keeps asking until non-empty)
 let username = "";
+let firstUpdate = true;
+const userLocations = {};
+
 function askName() {
   username = prompt("Enter your name:");
   if (!username || username.trim() === "") {
@@ -93,6 +96,8 @@ socket.on("user-connected", (data) => {
 // When user sends location
 socket.on("receive-location", (data) => {
   const { id, username: name, latitude, longitude } = data;
+  userLocations[id] = { lat: latitude, lon: longitude, name };
+
 
   if (!markers[id]) {
     markers[id] = L.marker([latitude, longitude])
@@ -108,8 +113,9 @@ socket.on("receive-location", (data) => {
     markers[id].setLatLng([latitude, longitude]);
   }
 
-  if (id === socket.id) {
-    map.setView([latitude, longitude], Math.max(map.getZoom(), 14));
+  if (id === socket.id && firstUpdate) {
+    map.setView([latitude, longitude], 14);
+    firstUpdate = false;
   }
 });
 
@@ -127,11 +133,26 @@ socket.on("user-disconnected", (data) => {
 
 socket.on("user-list", (users) => {
   const ul = document.getElementById("user-list");
-  ul.innerHTML = ""; // clear previous list
+  ul.innerHTML = "";
 
-  Object.values(users).forEach((name) => {
+  Object.entries(users).forEach(([id, userData]) => {
+    if (!userData || !userData.name) return;
+
     const li = document.createElement("li");
-    li.textContent = name;
+    li.textContent = userData.name;
     ul.appendChild(li);
+
+    // click to jump to user
+    li.onclick = () => {
+      if (userLocations[id]) {
+        map.flyTo([userLocations[id].lat, userLocations[id].lon], 17, {
+          duration: 1.2,
+        });
+      } else {
+        showToast("Location not received for " + userData.name);
+      }
+    };
   });
 });
+
+
